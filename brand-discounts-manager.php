@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Brand Discounts Manager
  * Description: Gestione degli sconti per marca per WooCommerce Brands
- * Version: 1.20
+ * Version: 1.0.30
  * Author: Il Tuo Negozio
  */
 
@@ -133,12 +133,13 @@ add_action('admin_head', function () {
         .bdm-stat-value { font-size: 24px; font-weight: 600; color: #1d2327; }
 
         /* FILTERS */
-        .bdm-toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
-        .bdm-search { flex: 1; padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; max-width:40% }
+        .bdm-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+        .bdm-search { flex: 0 1 240px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
         .bdm-search:focus { border-color: #7c3aed; outline: none; box-shadow: 0 0 0 2px rgba(124,58,237,.12); }
         .bdm-filter-btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #ddd; background: #fff; color: #374151; transition: all .15s; }
         .bdm-filter-btn.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
         .bdm-filter-btn:hover:not(.active) { background: #f3f4f6; }
+        .bdm-toolbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 
         /* TABLE */
         .bdm-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
@@ -177,6 +178,18 @@ add_action('admin_head', function () {
         .bdm-empty { text-align: center; padding: 48px; color: #9ca3af; font-size: 13px; }
 
         .bdm-hidden { display: none !important; }
+
+        .bdm-per-page-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #374151; font-weight: 500; white-space: nowrap; }
+        .bdm-per-page-wrap select { padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; cursor: pointer; }
+        .bdm-per-page-wrap select:focus { border-color: #7c3aed; outline: none; box-shadow: 0 0 0 2px rgba(124,58,237,.12); }
+        .bdm-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-top: 1px solid #f3f4f6; font-size: 13px; color: #6b7280; }
+        .bdm-pagination .bdm-page-btn { padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: #fff; color: #374151; transition: all .15s; }
+        .bdm-pagination .bdm-page-btn:hover:not(:disabled) { background: #f3f4f6; border-color: #9ca3af; }
+        .bdm-pagination .bdm-page-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .bdm-pagination .bdm-page-num { padding: 6px 10px; border: 1px solid transparent; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; background: none; color: #374151; min-width: 32px; text-align: center; transition: all .15s; }
+        .bdm-pagination .bdm-page-num:hover { background: #f3f4f6; }
+        .bdm-pagination .bdm-page-num.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+        .bdm-pagination .bdm-page-info { padding: 0 8px; white-space: nowrap; }
     </style>
     <?php
 });
@@ -287,17 +300,29 @@ function bdm_render_page() { ?>
         <button class="bdm-filter-btn active" data-filter="all">Tutti</button>
         <button class="bdm-filter-btn" data-filter="active">Con sconto</button>
         <button class="bdm-filter-btn" data-filter="inactive">Senza sconto</button>
-        <button class="bdm-btn bdm-btn-apply" id="bdm-recalc-all" style="margin-left:auto;">⟳ Ricalcola tutti</button>
-        <label style="font-size:12px;color:#6b7280;display:flex;align-items:center;gap:4px; width:17%; justify-content:flex-end;">
-          Cron alle
-          <select id="bdm-cron-hour" style="padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:120px;">
-            <?php for ($h = 0; $h < 24; $h++): ?>
-              <option value="<?php echo $h; ?>" <?php selected($h, get_option('bdm_cron_hour', 3)); ?>>
-                <?php echo sprintf('%02d:00', $h); ?>
-              </option>
-            <?php endfor; ?>
-          </select>
-        </label>
+        <div class="bdm-toolbar-right">
+          <div class="bdm-per-page-wrap">
+            Mostra
+            <select id="bdm-per-page">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="0">Tutte</option>
+            </select>
+          </div>
+          <button class="bdm-btn bdm-btn-apply" id="bdm-recalc-all">⟳ Ricalcola tutti</button>
+          <label style="font-size:12px;color:#6b7280;display:flex;align-items:center;gap:4px;white-space:nowrap;">
+            Cron alle
+            <select id="bdm-cron-hour" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;background:#fff;cursor:pointer;">
+              <?php for ($h = 0; $h < 24; $h++): ?>
+                <option value="<?php echo $h; ?>" <?php selected($h, get_option('bdm_cron_hour', 3)); ?>>
+                  <?php echo sprintf('%02d:00', $h); ?>
+                </option>
+              <?php endfor; ?>
+            </select>
+          </label>
+        </div>
     </div>
 
     <div class="bdm-card">
@@ -314,6 +339,7 @@ function bdm_render_page() { ?>
                 <tr><td colspan="4"><div class="bdm-empty">Caricamento in corso...</div></td></tr>
             </tbody>
         </table>
+        <div id="bdm-pagination" class="bdm-pagination"></div>
     </div>
 </div>
 
@@ -321,68 +347,133 @@ function bdm_render_page() { ?>
 (function($){
     const nonce = '<?php echo wp_create_nonce('bdm_nonce'); ?>';
     let allBrands = [];
+    let filteredBrands = [];
+    let currentPage = 1;
+    let pageSize = 10;
     let currentFilter = 'all';
     let currentSearch = '';
 
     function showNotice(msg, type) {
         $('#bdm-notice').attr('class', 'bdm-notice bdm-notice-' + type).html(msg).show();
-        setTimeout(() => $('#bdm-notice').fadeOut(), 5000);
+        setTimeout(function() { $('#bdm-notice').fadeOut(); }, 5000);
     }
 
     function updateStats(data) {
-        const active   = data.filter(b => b.active);
-        const products = active.reduce((s, b) => s + b.count, 0);
+        var active = data.filter(function(b) { return b.active; });
+        var products = 0;
+        for (var i = 0; i < active.length; i++) { products += active[i].count; }
         $('#stat-total').text(data.length);
         $('#stat-active').text(active.length);
         $('#stat-products').text(products);
     }
 
-    function renderTable(data) {
-        if (!data.length) {
-            $('#bdm-tbody').html('<tr><td colspan="4"><div class="bdm-empty">Nessun marchio trovato.</div></td></tr>');
-            return;
-        }
-        let html = '';
-        data.forEach(b => {
-            const badgeClass = b.active ? 'bdm-badge-active' : 'bdm-badge-inactive';
-            const badgeText  = b.active ? `${b.discount}% attivo` : 'Nessuno sconto';
-            html += `
-            <tr data-id="${b.id}" data-active="${b.active}" data-name="${b.name.toLowerCase()}">
-                <td>
-                    <div class="bdm-brand-name">${b.name}</div>
-                    <div class="bdm-brand-meta">${b.count} prodotti &middot; ID ${b.id}</div>
-                </td>
-                <td><span class="bdm-badge ${badgeClass} js-badge"><span class="bdm-badge-dot"></span>${badgeText}</span></td>
-                <td>
-                    <div class="bdm-input-wrap">
-                        <input type="number" class="bdm-discount-input js-discount" value="${b.discount}" min="1" max="90" step="1" placeholder="0">
-                        <span class="bdm-pct">%</span>
-                    </div>
-                </td>
-                <td>
-                    <div class="bdm-actions-cell">
-                        <div class="bdm-spinner js-spinner"></div>
-                        <button class="bdm-btn bdm-btn-apply js-apply">Applica</button>
-                        <button class="bdm-btn bdm-btn-revert js-revert">Rimuovi</button>
-                    </div>
-                </td>
-            </tr>`;
-        });
-        $('#bdm-tbody').html(html);
-        applyFilters();
+    function totalPages() {
+        if (!pageSize || !filteredBrands.length) return 1;
+        return Math.ceil(filteredBrands.length / pageSize);
     }
 
+    function getRowHtml(b) {
+        var badgeClass = b.active ? 'bdm-badge-active' : 'bdm-badge-inactive';
+        var badgeText  = b.active ? b.discount + '% attivo' : 'Nessuno sconto';
+        return '<tr data-id="' + b.id + '" data-active="' + b.active + '">' +
+            '<td><div class="bdm-brand-name">' + b.name + '</div>' +
+            '<div class="bdm-brand-meta">' + b.count + ' prodotti &middot; ID ' + b.id + '</div></td>' +
+            '<td><span class="bdm-badge ' + badgeClass + ' js-badge"><span class="bdm-badge-dot"></span>' + badgeText + '</span></td>' +
+            '<td><div class="bdm-input-wrap">' +
+            '<input type="number" class="bdm-discount-input js-discount" value="' + b.discount + '" min="1" max="90" step="1" placeholder="0">' +
+            '<span class="bdm-pct">%</span></div></td>' +
+            '<td><div class="bdm-actions-cell">' +
+            '<div class="bdm-spinner js-spinner"></div>' +
+            '<button class="bdm-btn bdm-btn-apply js-apply">Applica</button>' +
+            '<button class="bdm-btn bdm-btn-revert js-revert">Rimuovi</button></div></td></tr>';
+    }
+
+    function renderTable() {
+        var from = (currentPage - 1) * pageSize;
+        var to = Math.min(from + pageSize, filteredBrands.length);
+        var pageBrands = filteredBrands.slice(from, to);
+
+        if (!pageBrands.length) {
+            $('#bdm-tbody').html('<tr><td colspan="4"><div class="bdm-empty">Nessun marchio trovato.</div></td></tr>');
+            renderPagination();
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < pageBrands.length; i++) {
+            html += getRowHtml(pageBrands[i]);
+        }
+        $('#bdm-tbody').html(html);
+        renderPagination();
+    }
+
+    function renderPagination() {
+        var total = filteredBrands.length;
+        var pages = totalPages();
+
+        if (!total) {
+            $('#bdm-pagination').empty();
+            return;
+        }
+
+        var start = (currentPage - 1) * pageSize + 1;
+        var end = Math.min(currentPage * pageSize, total);
+
+        var html = '<span class="bdm-page-info">' + start + '\u2013' + end + ' di ' + total + ' marchi &mdash; Pagina ' + currentPage + ' di ' + pages + '</span>';
+
+        html += '<button class="bdm-page-btn" data-page="prev"' + (currentPage <= 1 ? ' disabled' : '') + '>\u00AB Precedente</button>';
+
+        for (var p = 1; p <= pages; p++) {
+            if (pages > 7) {
+                if (p === 1 || p === pages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+                    html += '<button class="bdm-page-num' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+                } else if (p === currentPage - 2 || p === currentPage + 2) {
+                    html += '<span style="color:#9ca3af;padding:0 2px;">&hellip;</span>';
+                }
+            } else {
+                html += '<button class="bdm-page-num' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+            }
+        }
+
+        html += '<button class="bdm-page-btn" data-page="next"' + (currentPage >= pages ? ' disabled' : '') + '>Successiva \u00BB</button>';
+
+        $('#bdm-pagination').html(html);
+    }
+
+    function goToPage(page) {
+        var pages = totalPages();
+        if (page < 1) page = 1;
+        if (page > pages) page = pages;
+        if (page === currentPage) return;
+        currentPage = page;
+        renderTable();
+    }
+
+    $(document).on('click', '#bdm-pagination .bdm-page-num', function() {
+        goToPage(parseInt($(this).data('page'), 10));
+    });
+
+    $(document).on('click', '#bdm-pagination .bdm-page-btn', function() {
+        if ($(this).prop('disabled')) return;
+        var action = $(this).data('page');
+        goToPage(action === 'prev' ? currentPage - 1 : currentPage + 1);
+    });
+
     function applyFilters() {
-        $('#bdm-tbody tr').each(function() {
-            const $r      = $(this);
-            const name    = $r.data('name') || '';
-            const active  = $r.data('active');
-            const matchS  = name.includes(currentSearch);
-            const matchF  = currentFilter === 'all'
-                          || (currentFilter === 'active'   && active)
-                          || (currentFilter === 'inactive' && !active);
-            $r.toggleClass('bdm-hidden', !(matchS && matchF));
-        });
+        var search = currentSearch.toLowerCase();
+        filteredBrands = [];
+        for (var i = 0; i < allBrands.length; i++) {
+            var b = allBrands[i];
+            var matchS = b.name.toLowerCase().indexOf(search) !== -1;
+            var matchF = currentFilter === 'all' ||
+                (currentFilter === 'active' && b.active) ||
+                (currentFilter === 'inactive' && !b.active);
+            if (matchS && matchF) {
+                filteredBrands.push(b);
+            }
+        }
+        currentPage = 1;
+        renderTable();
     }
 
     function loadBrands() {
@@ -390,7 +481,7 @@ function bdm_render_page() { ?>
             if (res.success) {
                 allBrands = res.data;
                 updateStats(allBrands);
-                renderTable(allBrands);
+                applyFilters();
             } else {
                 showNotice('Errore durante il caricamento dei marchi.', 'error');
             }
@@ -398,11 +489,11 @@ function bdm_render_page() { ?>
     }
 
     function applyDiscount($row, mode) {
-        const id       = $row.data('id');
-        const discount = $row.find('.js-discount').val();
-        const $spinner = $row.find('.js-spinner');
-        const $btnA    = $row.find('.js-apply');
-        const $btnR    = $row.find('.js-revert');
+        var id       = $row.data('id');
+        var discount = $row.find('.js-discount').val();
+        var $spinner = $row.find('.js-spinner');
+        var $btnA    = $row.find('.js-apply');
+        var $btnR    = $row.find('.js-revert');
 
         if (mode === 'apply' && (discount <= 0 || discount > 90)) {
             showNotice('Inserisci uno sconto tra 1% e 90%.', 'error');
@@ -422,11 +513,12 @@ function bdm_render_page() { ?>
         });
     }
 
+    /* Eventi */
     $(document).on('click', '.js-apply',  function() { applyDiscount($(this).closest('tr'), 'apply'); });
     $(document).on('click', '.js-revert', function() { applyDiscount($(this).closest('tr'), 'revert'); });
 
     $('#bdm-cron-hour').on('change', function() {
-        const $sel = $(this);
+        var $sel = $(this);
         $.post(ajaxurl, { action: 'bdm_set_cron_hour', nonce, hour: $sel.val() }, function(res) {
             if (res.success) {
                 showNotice(res.data.message, 'success');
@@ -437,9 +529,9 @@ function bdm_render_page() { ?>
     });
 
     $('#bdm-recalc-all').on('click', function() {
-        const $btn = $(this).prop('disabled', true).text('Ricalcolo...');
+        var $btn = $(this).prop('disabled', true).text('Ricalcolo...');
         $.post(ajaxurl, { action: 'bdm_recalculate_all', nonce }, function(res) {
-            $btn.prop('disabled', false).text('⟳ Ricalcola tutti');
+            $btn.prop('disabled', false).text('\u27F3 Ricalcola tutti');
             if (res.success) {
                 showNotice(res.data.message, 'success');
                 loadBrands();
@@ -447,6 +539,13 @@ function bdm_render_page() { ?>
                 showNotice('Errore durante il ricalcolo.', 'error');
             }
         });
+    });
+
+    $('#bdm-per-page').on('change', function() {
+        var val = parseInt($(this).val(), 10);
+        pageSize = val === 0 ? filteredBrands.length : val;
+        currentPage = 1;
+        renderTable();
     });
 
     $('#bdm-search').on('input', function() {

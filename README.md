@@ -88,7 +88,7 @@ El plugin es un archivo único (`brand-discounts-manager.php`) sin dependencias 
 GPL v2 o posterior.
 
 ## version Update   
-- v1.0.0 - 2024-06-10 - Versión inicial
-- v1.0.1 - 2024-06-12 - Corrección de errores menores y mejoras en la interfaz
-- v1.1.0 - 2024-06-15 - Agregado botón de recalculo manual y optimización del cron diario
-
+- v1.0.0 - 2026-03-10 - Versión inicial
+- v1.0.1 - 2026-05-12 - Corrección de errores menores y mejoras en la interfaz
+- v1.0.20 - 2026-06-15 - Agregado botón de recalculo manual y optimización del cron diario
+- v1.0.30 - 2026-07-17 - Mejoras en la paginacion  
